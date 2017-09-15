@@ -1,0 +1,8 @@
+- hosts: vultr
+  remote_user: root
+  tasks:
+    - name: setup autologout
+      run_once: true
+      script: /Users/haofuxin/github/my-ansible/scripts/setup_autologout.sh
+      args:
+        creates: /etc/profile.d/autologout.sh
