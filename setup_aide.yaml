@@ -1,0 +1,41 @@
+- hosts: security
+  remote_user: root
+  tasks:
+    - name: install aide
+      package:
+        name: "{{ item }}"
+      with_items:
+        - aide
+        - aide-common
+    - name: limit the scope
+      shell: 
+        cmd: "{{ item }}"
+        chdir: /etc/aide/aide.conf.d
+      args:
+        chdir: /etc/aide/aide.conf.d
+      with_items:
+        - rm 99_aide_*
+        - rm 70_aide_*
+        - rm 31_aide_php*
+      args:
+        removes: /etc/aide/aide.conf.d/99_aide_root
+    - name: initiate aide
+      run_once: true
+      command: aideinit
+      args:
+        creates: /var/lib/aide/aide.db.new
+    - name: upload scripts
+      copy:
+        src: /Users/haofuxin/github/my-ansible/scripts/aide.sh
+        dest: /root/aide.sh
+        owner: root
+        group: root
+        mode: 0744
+    - name: setup cron task
+      cron:
+        name: setup aide
+        weekday: 1
+        minute: 0
+        hour: 0
+        user: root
+        job: "/root/aide.sh"
